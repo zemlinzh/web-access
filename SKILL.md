@@ -17,7 +17,7 @@ metadata:
 在开始联网操作前，先检查 CDP 模式可用性：
 
 ```bash
-node ~/.claude/skills/web-access/scripts/check-deps.mjs
+node "$CLAUDE_SKILL_DIR/scripts/check-deps.mjs"
 ```
 
 - **Node.js 22+**：必需（使用原生 WebSocket）。版本低于 22 可用但需安装 `ws` 模块。
@@ -82,7 +82,7 @@ node ~/.claude/skills/web-access/scripts/check-deps.mjs
 ### 启动
 
 ```bash
-node ~/.claude/skills/web-access/scripts/check-deps.mjs
+node "$CLAUDE_SKILL_DIR/scripts/check-deps.mjs"
 ```
 
 脚本会依次检查 Node.js、Chrome 端口，并确保 Proxy 已连接（未运行则自动启动并等待）。Proxy 启动后持续运行。
