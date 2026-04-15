@@ -138,6 +138,41 @@ async function ensureProxy() {
   return false;
 }
 
+// --- 自动打开 chrome://inspect/#remote-debugging ---
+
+function openChromeInspect() {
+  const platform = os.platform();
+  let chromePaths = [];
+
+  if (platform === 'win32') {
+    const localAppData = process.env.LOCALAPPDATA || '';
+    const programFiles = process.env.PROGRAMFILES || 'C:\\Program Files';
+    const programFilesX86 = process.env['PROGRAMFILES(X86)'] || 'C:\\Program Files (x86)';
+    chromePaths = [
+      path.join(localAppData, 'Google\\Chrome\\Application\\chrome.exe'),
+      path.join(programFiles, 'Google\\Chrome\\Application\\chrome.exe'),
+      path.join(programFilesX86, 'Google\\Chrome\\Application\\chrome.exe'),
+    ];
+  } else if (platform === 'darwin') {
+    chromePaths = ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'];
+  } else {
+    chromePaths = ['/usr/bin/google-chrome', '/usr/bin/chromium-browser', '/usr/bin/chromium'];
+  }
+
+  const chromeBin = chromePaths.find(p => fs.existsSync(p));
+  if (!chromeBin) {
+    console.log('  （无法自动定位 Chrome，请手动在地址栏输入 chrome://inspect/#remote-debugging）');
+    return;
+  }
+
+  console.log('  正在自动打开 chrome://inspect/#remote-debugging ...');
+  spawn(chromeBin, ['chrome://inspect/#remote-debugging'], {
+    detached: true,
+    stdio: 'ignore',
+    ...(platform === 'win32' ? { windowsHide: false } : {}),
+  }).unref();
+}
+
 // --- main ---
 
 async function main() {
@@ -145,7 +180,8 @@ async function main() {
 
   const chromePort = await detectChromePort();
   if (!chromePort) {
-    console.log('chrome: not connected — 请确保 Chrome 已打开，然后访问 chrome://inspect/#remote-debugging 并勾选 Allow remote debugging');
+    console.log('chrome: not connected — 请在弹出的 Chrome 页面中勾选 "Allow remote debugging for this browser instance"');
+    openChromeInspect();
     process.exit(1);
   }
   console.log(`chrome: ok (port ${chromePort})`);

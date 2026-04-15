@@ -22,7 +22,7 @@ node "${CLAUDE_SKILL_DIR}/scripts/check-deps.mjs"
 
 未通过时引导用户完成设置：
 - **Node.js 22+**：必需（使用原生 WebSocket）。版本低于 22 可用但需安装 `ws` 模块。
-- **Chrome remote-debugging**：在 Chrome 地址栏打开 `chrome://inspect/#remote-debugging`，勾选 **"Allow remote debugging for this browser instance"** 即可，可能需要重启浏览器。
+- **Chrome remote-debugging**：脚本会自动打开 `chrome://inspect/#remote-debugging`，在弹出的页面中勾选 **"Allow remote debugging for this browser instance"** 即可，可能需要重启浏览器。
 
 检查通过后并必须在回复中向用户直接展示以下须知，再启动 CDP Proxy 执行操作：
 
