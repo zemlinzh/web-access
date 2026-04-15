@@ -166,7 +166,7 @@ function openChromeInspect() {
   }
 
   console.log('  正在自动打开 chrome://inspect/#remote-debugging ...');
-  spawn(chromeBin, ['chrome://inspect/#remote-debugging'], {
+  spawn(chromeBin, ['--new-tab', 'chrome://inspect/#remote-debugging'], {
     detached: true,
     stdio: 'ignore',
     ...(platform === 'win32' ? { windowsHide: false } : {}),
@@ -178,13 +178,25 @@ function openChromeInspect() {
 async function main() {
   checkNode();
 
-  const chromePort = await detectChromePort();
+  let chromePort = await detectChromePort();
   if (!chromePort) {
     console.log('chrome: not connected — 请在弹出的 Chrome 页面中勾选 "Allow remote debugging for this browser instance"');
     openChromeInspect();
-    process.exit(1);
+    console.log('  等待 30 秒后重新检测...');
+    for (let i = 30; i > 0; i--) {
+      process.stdout.write(`\r  剩余 ${i} 秒... `);
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    process.stdout.write('\r                    \r');
+    chromePort = await detectChromePort();
+    if (!chromePort) {
+      console.log('chrome: 仍未检测到远程调试端口，请确认已勾选后重试');
+      process.exit(1);
+    }
+    console.log(`chrome: ok (port ${chromePort})`);
+  } else {
+    console.log(`chrome: ok (port ${chromePort})`);
   }
-  console.log(`chrome: ok (port ${chromePort})`);
 
   const proxyOk = await ensureProxy();
   if (!proxyOk) {
